@@ -1,0 +1,11 @@
+accelerate
+datasets
+transformers
+bitsandbytes>=0.39.0
+matplotlib
+scikit-learn
+adjustText
+rouge
+nltk
+bert-score
+sentence-transformers
