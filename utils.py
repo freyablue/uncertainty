@@ -1,5 +1,9 @@
 import re
 
+def str_to_bool(s):
+    return s.lower() in ['true', '1', 'yes']
+
+
 def make_prompt(args, question_string):
     """
         function to make the instruction prompt for the given question
@@ -25,9 +29,9 @@ def make_prompt(args, question_string):
 
         1.YourAnswer1, 2.YourAnswer2, 3.YourAnswer3
 
-        Input : 
+        Input :
 
-        Question: 
+        Question:
 
         {question_string}
 
@@ -41,10 +45,10 @@ def make_prompt(args, question_string):
 
     elif args['prompt_phrasing'] == 2:
         # zero-shot COT for mathemtical reasoning
-        
+
         prompt = f"""Instruction : Given a question that has multiple answers, answer the question following the instructions below:
 
-        1. Explain step-by-step, and then provide your answer. 
+        1. Explain step-by-step, and then provide your answer.
         2. When providing an answer, use the format ||ANSWERS|| where ANSWERS are the answers to the given question.
         3. Separate each answer of ANSWERS with a comma and a space.
 
@@ -52,9 +56,9 @@ def make_prompt(args, question_string):
 
         ||ANSWER1, ANSWER2, ANSWER3||
 
-        Input : 
+        Input :
 
-        Question: 
+        Question:
 
         {question_string}
 
@@ -66,10 +70,10 @@ def make_prompt(args, question_string):
 
     elif args['prompt_phrasing'] == 3:
         # zero-shot COT for commonsense reasoning
-        
+
         prompt = f"""Instruction : Given a set of questions, find the questions that have true answers following the instructions below:
 
-        1. Explain step-by-step, and then provide your answer. 
+        1. Explain step-by-step, and then provide your answer.
         2. When providing an answer, use the format ||ANSWERS|| where ANSWERS are the answers to the given question.
         3. Separate each answer of ANSWERS with a comma and a space.
         4. Each answer should be a single alphabet letter that corresponds to the question number.
@@ -82,7 +86,7 @@ def make_prompt(args, question_string):
 
         Here is the given set of questions:
 
-        Questions: 
+        Questions:
 
         {question_string}
 
@@ -95,10 +99,10 @@ def make_prompt(args, question_string):
 
     elif args['prompt_phrasing'] == 5:
         # verbalized confidence for world knowledge
-        
+
         prompt = f"""Instruction : Given a question that has multiple answers, answer the question and then provide the confidence in this answer, which indicates how likely you think your answer is true, following the instructions below:
 
-        1. Keep your response as brief as possible without any explanation, and then provide your answer and confidence. 
+        1. Keep your response as brief as possible without any explanation, and then provide your answer and confidence.
         2. When providing an answer, use the format ||ANSWERS|| where ANSWERS are the answers to the given question.
         3. Separate each answer of ANSWERS with a comma and a space.
         4. The confidence should be a numerical number in the range of 0-100.
@@ -110,7 +114,7 @@ def make_prompt(args, question_string):
 
         Now, please answer this question.
 
-        Question: 
+        Question:
 
         {question_string}
 
@@ -121,10 +125,10 @@ def make_prompt(args, question_string):
 
     elif args['prompt_phrasing'] == 6:
         # verbalized confidence for mathemtical reasoning
-        
+
         prompt = f"""Instruction : Given a question that has multiple answers, answer the question and then provide the confidence in this answer, which indicates how likely you think your answer is true, following the instructions below:
 
-        1. Explain step-by-step, and then provide your answer and confidence. 
+        1. Explain step-by-step, and then provide your answer and confidence.
         2. When providing an answer, use the format ||ANSWERS|| where ANSWERS are the answers to the given question.
         3. Separate each answer of ANSWERS with a comma and a space.
         4. The confidence should be a numerical number in the range of 0-100.
@@ -136,7 +140,7 @@ def make_prompt(args, question_string):
 
         Now, please answer this question.
 
-        Question: 
+        Question:
 
         {question_string}
 
@@ -147,10 +151,10 @@ def make_prompt(args, question_string):
 
     elif args['prompt_phrasing'] == 7:
         # verbalized confidence for commonsense reasoning
-        
+
         prompt = f"""Instruction : Given a set of questions, find the questions that have true answers and then provide the confidence in your answer, which indicates how likely you think your answer is true, following the instructions below:
 
-        1. Explain step-by-step, and then provide your answer and confidence. 
+        1. Explain step-by-step, and then provide your answer and confidence.
         2. When providing an answer, use the format ||ANSWERS|| where ANSWERS are the answers to the given question.
         3. Separate each answer of ANSWERS with a comma and a space.
         4. Each answer should be a single alphabet letter that corresponds to the question number.
@@ -163,7 +167,7 @@ def make_prompt(args, question_string):
 
         Here is the given set of questions:
 
-        Question: 
+        Question:
 
         {question_string}
 
@@ -172,22 +176,22 @@ def make_prompt(args, question_string):
         Answer: \n
 
         """
-    
 
 
-    ################ -------------------single answer ---- ##########     
+
+    ################ -------------------single answer ---- ##########
 
     elif args['prompt_phrasing'] == -1:
         # zero-shot for world knowledge
         prompt = f"""Instruction : Given a question that requires one single answer, answer the question following the instructions below:
 
         1. Only provide the answer without any explanation.
-        2. Use the format ||ANSWER|| where ANSWER is the answer to the question. 
+        2. Use the format ||ANSWER|| where ANSWER is the answer to the question.
             Example: ||Korea||, ||David||, ||1784||
 
         Input:
 
-        Question: 
+        Question:
 
         {question_string}
 
@@ -199,9 +203,9 @@ def make_prompt(args, question_string):
         # zero-shot for mathemtical reasoning
         prompt = f"""Instruction : Given a question that requires one single answer, answer the question following the instructions below:
 
-        1. Explain step-by-step, and then provide your answer. 
+        1. Explain step-by-step, and then provide your answer.
         2. Remark: The answer should only be a number. So do not use any other units or symbols.
-        
+
         The format of the final answer, that comes after the explanation, should be given as follows:
 
         ||YOUR_ANSWER||
@@ -217,29 +221,29 @@ def make_prompt(args, question_string):
 
     elif args['prompt_phrasing'] == -3:
         # zero-shot for commonsense reasoning
-        
+
         prompt = f"""Instruction : Given a question, provide your thought whether the answer to the question is true or false, following the instructions below:
 
-        1. Explain step-by-step, and then provide your answer. 
+        1. Explain step-by-step, and then provide your answer.
         2. When providing an answer, use the format ||ANSWER|| where ANSWER is the answer to the given question.
         3. Answer should be either ||true|| or ||false||.
 
-        Questions: 
+        Questions:
 
         {question_string}
 
-        Now answer the question. 
+        Now answer the question.
 
         Answer: \n
 
         """
-    
+
     elif args['prompt_phrasing'] == -5:
         # verbalized confidence for world knowledge
         prompt = f"""Instruction : Given a question that requires one single answer, answer the question and then provide the confidence in this answer, which indicates how likely you think your answer is true, following the instructions below:
 
         1. Only provide the answer without any explanation.
-        2. Use the format ||ANSWER|| where ANSWER is the answer to the question. 
+        2. Use the format ||ANSWER|| where ANSWER is the answer to the question.
         3. The confidence should be a numerical number in the range of 0-100.
 
         Use the following format for the final answer and confidence:
@@ -253,7 +257,7 @@ def make_prompt(args, question_string):
 
         Input:
 
-        Question: 
+        Question:
 
         {question_string}
 
@@ -266,7 +270,7 @@ def make_prompt(args, question_string):
         prompt = f"""Instruction : Given a question that requires one single answer, answer the question and then provide the confidence in this answer, which indicates how likely you think your answer is true, following the instructions below:
 
         1. Explain step-by-step, and then provide your answer.
-        2. Use the format ||ANSWER|| where ANSWER is the answer to the question. 
+        2. Use the format ||ANSWER|| where ANSWER is the answer to the question.
         3. Remark: The answer should only be a number. So do not use any other units or symbols.
         4. The confidence should be a numerical number in the range of 0-100.
 
@@ -279,19 +283,19 @@ def make_prompt(args, question_string):
 
         Input:
 
-        Question: 
+        Question:
 
         {question_string}
 
         Answer:\n
         """
 
-    
+
     elif args['prompt_phrasing'] == -7:
         # verbalized confidence for commonsense reasoning
         prompt = f"""Instruction : Given a question, provide your thought whether the answer to the question is true or false and then provide the confidence in this answer, which indicates how likely you think your answer is true, following the instructions below:
 
-        1. Explain step-by-step, and then provide your answer. 
+        1. Explain step-by-step, and then provide your answer.
         2. When providing an answer, use the format ||ANSWER|| where ANSWER is the answer to the given question.
         3. Answer should be either ||true|| or ||false||.
         4. The confidence should be a numerical number in the range of 0-100.
@@ -306,21 +310,21 @@ def make_prompt(args, question_string):
 
         Input:
 
-        Question: 
+        Question:
 
         {question_string}
 
         Answer:\n
         """
 
-    
+
     else:
         raise Exception(f"Unknown phrasing option: {args['prompt_phrasing']}. Must be 0 or 1.")
             # For some reason the final newline makes Falcon-7b act really weird
     return prompt if args['model'] != 'Falcon-7b' else prompt[:-1]
 
 
-def determine_llm_answer(llm_output, prompt_phrasing=0):
+def determine_llm_answer(llm_output, prompt_phrasing=5):
     """
         Function to parse the answer from the LLM output
         Please refer to make_prompt function to match the format of the answer with the prompt_phrasing
@@ -330,13 +334,13 @@ def determine_llm_answer(llm_output, prompt_phrasing=0):
         try:
             # pattern = re.compile(r'\d+\.\s(.*?)(,|\n|$)')
             pattern = re.compile(r'\d+\.\s*([^,]+)')
-            
+
             # Find all matches in the answer string
             matches = pattern.findall(llm_output)
-            
+
             # Extract just the answer part from each match, ignoring trailing commas or new lines
             # Define the new regex pattern to capture answers with or without numbers
-            
+
 
 
             # Extract just the answer part from each match, ignoring leading or trailing spaces
@@ -349,29 +353,51 @@ def determine_llm_answer(llm_output, prompt_phrasing=0):
             # Remove unwanted characters like 1., 2., , or .
             answers = [re.sub(r'^\d+\.\s*|[,.]$', '', answer).strip() for answer in answers]
             # answers = [match[0].strip() for match in matches if match[0].strip()]
-            
+
             return answers
-        
+
         except Exception as e:
             return f"Could not parse answer: {str(e)}"
 
     elif prompt_phrasing >= 5 and prompt_phrasing < 10:
         try:
+            "print: go to this if condition"
             # Define the regular expression pattern to extract answers and confidence
-            pattern = re.compile(r'.*?\|\|?(.*?)(?:\|\||\|).*?,\s*(\d{1,3})\s*.*')
+            #pattern = re.compile(r'.*?\|\|?(.*?)(?:\|\||\|).*?,\s*(\d{1,3})\s*.*')
 
             # Search for the pattern in the input string
+            #match = pattern.search(llm_output)
+
+            # if match:
+            #     # Extract answers and confidence from the matched groups
+            #     answers_part = match.group(1)
+            #     answers = [answer.strip() for answer in answers_part.split(',')]
+            #     confidence = int(match.group(2).strip())
+
+            #     return answers, confidence
+            numbered_pattern = re.findall(r'\d+\.\s*([\w\s\-\.]+)', llm_output)
+            if numbered_pattern:
+                return numbered_pattern, None
+            # 匹配格式：||答案1, 答案2, 答案3||, 95
+            # 允许格式如：
+            # "||A, B, C||, 95"
+            # "||A, B, C|| 95"
+            # "|| A, B, C || 95"
+            pattern = re.compile(r'\|\|\s*(.*?)\s*\|\|\s*,?\s*(\d{1,3})')
+            pattern = re.compile(r'\|\|\s*(.*?)\s*\|\|\s*[,]?\s*(\d{1,3})')
+            #pattern = re.compile(r'\|\|\s*(.*?)\s*\|\|\s*,\s*(\d{1,3})')
             match = pattern.search(llm_output)
 
             if match:
-                # Extract answers and confidence from the matched groups
-                answers_part = match.group(1)
-                answers = [answer.strip() for answer in answers_part.split(',')]
-                confidence = int(match.group(2).strip())
-                
+                answer_str = match.group(1)  # "Bob Dylan, George Harrison, ..."
+                confidence_str = match.group(2)  # "95"
+
+                answers = [a.strip() for a in answer_str.split(',')]
+                confidence = int(confidence_str)
+
                 return answers, confidence
             else:
-                return [], None
+                return [llm_output], None
 
         except ValueError:
             # Handle case where confidence part is not a valid integer
@@ -380,10 +406,10 @@ def determine_llm_answer(llm_output, prompt_phrasing=0):
 
     elif prompt_phrasing >= 1:
         try:
-            
+
             # Split the input string by '||'
             parts = llm_output.split('||')
-            
+
             # Check if the input string has the correct format
             if len(parts) >= 3:
                 # Extract the answers from the second part
@@ -408,7 +434,7 @@ def determine_llm_answer(llm_output, prompt_phrasing=0):
 
             else:
                 return []
-        
+
         except Exception as e:
             return f"Could not parse answer: {str(e)}"
 
@@ -425,7 +451,7 @@ def determine_llm_answer(llm_output, prompt_phrasing=0):
                 # Extract answer and confidence from the matched groups
                 answer = match.group(1).strip()
                 confidence = int(match.group(2).strip())
-                
+
                 return answer, confidence
             else:
                 return "No answer found", None

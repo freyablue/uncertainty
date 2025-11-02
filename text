@@ -1,0 +1,3 @@
+./scripts/run_qa_tests.sh Qwen-7b MAQA_world_knowledge_nq 0-0 5 True bleu,exact_match,verablized
+
+source myenv/bin/activate

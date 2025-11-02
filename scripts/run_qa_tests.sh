@@ -82,7 +82,8 @@ do
         for model in "${model_options[@]}"
         do
             # Determine batch_size based on the model and dataset
-            batch_size=$(get_batch_size "$model" "$dataset")
+            #batch_size=$(get_batch_size "$model" "$dataset")
+            batch_size=2
 
             # Define log file name
             log_file="logs/${model}_${dataset}_${question_range}_prompt-phrasing-${prompt_phrasing}_log.txt"
@@ -90,7 +91,7 @@ do
             # Running the command with the arguments
             echo -e "\nRunning take_qa_test.py with arguments: --model=$model --dataset=$dataset --question_range=$question_range --batch_size=$batch_size --prompt_phrasing=$prompt_phrasing --max_new_tokens=64 --num_top_tokens=10 --ue_mode white --eval_methods $eval_methods --overwrite $overwrite\n"
             
-            python take_qa_test.py --model="$model" --dataset="$dataset" --question_range="$question_range" --batch_size="$batch_size" --prompt_phrasing="$prompt_phrasing" --max_new_tokens=64 --num_top_tokens=10 --ue_mode "white" --eval_methods "$eval_methods" --overwrite "$overwrite" #&> "$log_file"
+            python3 take_qa_test.py --model="$model" --dataset="$dataset" --question_range="$question_range" --batch_size="$batch_size" --prompt_phrasing="$prompt_phrasing" --max_new_tokens=64 --num_top_tokens=10 --ue_mode "white" --eval_methods "$eval_methods" --overwrite "$overwrite" #&> "$log_file"
         done
     done
 done

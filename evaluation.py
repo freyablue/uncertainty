@@ -24,9 +24,9 @@ class Evaluator:
         # Evaluate the prediction
         if isinstance(gt_answers, list):
             # Check if any ground truth answer is included in the predicted answer or vice versa
-            
-            match_found = any((gt.lower() in pred_answer or pred_answer in gt.lower()) for gt in gt_answers)
-            # match_found = any((gt.lower() == pred_answer) for gt in gt_answers)
+
+            #match_found = any((gt.lower() in pred_answer or pred_answer in gt.lower()) for gt in gt_answers)
+            match_found = any((gt.lower() in pred_answer) for gt in gt_answers)
 
             eval_score = int(match_found)
         elif isinstance(gt_answers, str):
@@ -40,11 +40,11 @@ class Evaluator:
             eval_score = 0
 
         return eval_score
-    
+
     def single_rouge_eval(self,gt_answers, pred_answer):
         # Create a ROUGE scorer with the desired metrics
         rouge = Rouge()
-        
+
         # Join multiple ground truth answers into a single string if they are in a list
         if isinstance(gt_answers, list):
             gt_answers = ' '.join(gt_answers)
@@ -52,8 +52,8 @@ class Evaluator:
             # Calculate the ROUGE scores
             scores = rouge.get_scores(gt_answers, pred_answer)[0]['rouge-l']['f']
         except:
-            scores=0 
-        
+            scores=0
+
         return scores
 
 
@@ -63,11 +63,19 @@ class Evaluator:
                 if isinstance(gt, (int, float)):
                     return gt == float(pred)
                 elif isinstance(gt, str):
-                    return pred.lower() == gt.lower()
+                    gt_answers = str(gt).lower() if not isinstance(gt, list) else [str(item).lower() for item in gt]
+                    pred_answers = str(pred).lower() if not isinstance(pred, list) else [str(item).lower() for item in pred]
+                    #return pred.lower() == gt.lower()
+                    return gt_answers == pred_answers
                     # return (pred.lower() in gt.lower()) or (gt.lower() in pred.lower())
                 elif isinstance(gt, list):
-                    # return any(((pred.lower() in str(item).lower()) or (str(item).lower() in pred.lower())) for item in gt)
+                    if isinstance(pred, list):
+                        pred = " ".join(pred)
+                    if pred==None:
+                        return False
                     return any((pred.lower() == str(item).lower()) for item in gt)
+                    # return any(((pred.lower() in str(item).lower()) or (str(item).lower() in pred.lower())) for item in gt)
+                    #return any((pred.lower() == str(item).lower()) for item in gt if isinstance(gt, list))
             except ValueError:
                 return False
             return False
@@ -129,14 +137,17 @@ class Evaluator:
         return rouge_precision, rouge_recall, rouge_f1_score, rouge_scores_precision
 
     def bleu_eval(self, gt_answers, pred_answers):
-        gt_answers = [[gt.lower().split()] for gt in gt_answers]  # List of lists of tokens for each ground truth answer
-        pred_answers = [pred.lower().split() for pred in pred_answers]  # List of tokens for each predicted answer
-        
+        #gt_answers = [[gt.lower().split()] for gt in gt_answers]  # List of lists of tokens for each ground truth answer
+        gt_answers = [str(gt).lower() if not isinstance(gt, list) else [str(item).lower() for item in gt] for gt in gt_answers]
+        pred_answers = [str(pred).lower() if not isinstance(pred, list) else [str(item).lower() for item in pred] for pred in pred_answers]
+
+        #pred_answers = [pred.lower().split() for pred in pred_answers]  # List of tokens for each predicted answer
+
         max_bleu_scores = []
         for pred in pred_answers:
             scores = [sentence_bleu(gt, pred, smoothing_function=SmoothingFunction().method1) for gt in gt_answers]  # Compute BLEU for each ground truth
             max_bleu_scores.append(max(scores))
-        
+
         bleu_precision = sum(max_bleu_scores) / len(max_bleu_scores) if max_bleu_scores else 0
         bleu_recall = sum(max_bleu_scores) / len(gt_answers) if max_bleu_scores else 0
         bleu_f1_score = 2 * bleu_precision * bleu_recall / (bleu_precision + bleu_recall) if (bleu_precision + bleu_recall) != 0 else 0
@@ -144,14 +155,15 @@ class Evaluator:
         return bleu_precision, bleu_recall, bleu_f1_score
 
     def bertscore_eval(self, gt_answers, pred_answers):
-        gt_answers = [gt.lower() for gt in gt_answers]
-        pred_answers = [pred.lower() for pred in pred_answers]
+        #gt_answers = [gt.lower() for gt in gt_answers]
+        gt_answers = [str(gt).lower() if not isinstance(gt, list) else [str(item).lower() for item in gt] for gt in gt_answers]
+        pred_answers = [str(pred).lower() if not isinstance(pred, list) else [str(item).lower() for item in pred] for pred in pred_answers]
 
         max_bert_scores = []
         for pred in pred_answers:
             P, R, F1 = score([pred]*len(gt_answers), gt_answers, lang='en', device='cuda')
             max_bert_scores.append(F1.max().item())
-        
+
         bert_precision = sum(max_bert_scores) / len(max_bert_scores) if max_bert_scores else 0
         bert_recall = sum(max_bert_scores) / len(gt_answers) if max_bert_scores else 0
         bert_f1_score = 2 * bert_precision * bert_recall / (bert_precision + bert_recall) if (bert_precision + bert_recall) != 0 else 0
@@ -159,8 +171,12 @@ class Evaluator:
         return bert_precision, bert_recall, bert_f1_score
 
     def edit_distance_eval(self, gt_answers, pred_answers):
-        gt_answers = [gt.lower() for gt in gt_answers]
-        pred_answers = [pred.lower() for pred in pred_answers]
+        #gt_answers = [gt.lower() for gt in gt_answers]
+        gt_answers = [str(gt).lower() if not isinstance(gt, list) else [str(item).lower() for item in gt] for gt in gt_answers]
+
+
+        #pred_answers = [pred.lower() for pred in pred_answers]
+        pred_answers = [str(pred).lower() if not isinstance(pred, list) else [str(item).lower() for item in pred] for pred in pred_answers]
 
         min_edit_distances = []
         for pred in pred_answers:
@@ -178,19 +194,22 @@ class Evaluator:
         return edit_precision, edit_recall, edit_f1_score
 
     def cosine_similarity_eval(self, gt_answers, pred_answers):
-        gt_answers = [gt.lower() for gt in gt_answers]
+        #gt_answers = [gt.lower() for gt in gt_answers]
+        gt_answers = [str(gt).lower() if not isinstance(gt, list) else [str(item).lower() for item in gt] for gt in gt_answers]
+
+
         pred_answers = [pred.lower() for pred in pred_answers]
-        
+
         vectorizer = TfidfVectorizer()
         vectors = vectorizer.fit_transform(gt_answers + pred_answers)
         gt_vectors = vectors[:len(gt_answers)]
         pred_vectors = vectors[len(gt_answers):]
-        
+
         max_cosine_scores = []
         for pred_vector in pred_vectors:
             scores = cosine_similarity(pred_vector, gt_vectors).flatten()
             max_cosine_scores.append(max(scores))
-        
+
         cosine_precision = sum(max_cosine_scores) / len(max_cosine_scores) if max_cosine_scores else 0
         cosine_recall = sum(max_cosine_scores) / len(gt_answers) if max_cosine_scores else 0
         cosine_f1_score = 2 * cosine_precision * cosine_recall / (cosine_precision + cosine_recall) if (cosine_precision + cosine_recall) != 0 else 0
@@ -199,7 +218,8 @@ class Evaluator:
 
     def meteor_eval(self, gt_answers, pred_answers):
         # Tokenize both ground truth and predicted answers
-        gt_answers = [nltk.word_tokenize(gt.lower()) for gt in gt_answers]
+        gt_answers = [str(gt).lower() if not isinstance(gt, list) else [str(item).lower() for item in gt] for gt in gt_answers]
+
         pred_answers = [nltk.word_tokenize(pred.lower()) for pred in pred_answers]
 
         max_meteor_scores = []
@@ -236,8 +256,8 @@ class Evaluator:
                     result_el['rouge_f1_score'] = rouge_f1_score
                     if self.args['ue_mode'] == 'white':
                         result_el['rouge_match_scores'] = rouge_match_scores
-                    
-                elif 'exact' in eval_method: 
+
+                elif 'exact' in eval_method:
                     mean_precision, mean_recall, mean_f1_score, exact_match_scores = self.exact_match(gt_answer, predicted_answer)
                     result_el['exact_precision'] = mean_precision
                     result_el['exact_recall'] = mean_recall
@@ -245,7 +265,7 @@ class Evaluator:
                     if self.args['ue_mode'] == 'white':
                         result_el['exact_match_scores'] = exact_match_scores
 
-                
+
                 elif 'bleu' in eval_method:
                     bleu_precision, bleu_recall, bleu_f1_score = self.bleu_eval(gt_answer, predicted_answer)
                     result_el['bleu_precision'] = bleu_precision
@@ -282,7 +302,6 @@ class Evaluator:
                     raise Exception(f"Unknown evaluation method: {self.args['eval_methods']}")
 
         return result_el
-
 
     
     
